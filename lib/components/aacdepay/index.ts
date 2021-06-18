@@ -65,7 +65,7 @@ export class AACDepay extends Tube {
             validMedia = media
           }
         }
-        if (validMedia && validMedia.rtpmap !== undefined) {
+        if (validMedia && validMedia.rtpmap !== undefined && validMedia.fmtp !== undefined) {
           AACPayloadType = Number(validMedia.rtpmap.payloadType)
           const parameters = validMedia.fmtp.parameters
           // Required

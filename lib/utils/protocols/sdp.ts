@@ -145,7 +145,7 @@ export interface MediaDescription extends RtspExtensions {
     readonly payloadType: number
   }
   // a=fmtp:<format> <format specific parameters>
-  readonly fmtp: {
+  fmtp?: {
     readonly format: string
     readonly parameters: { [key: string]: any }
   }
