@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Example video streaming from a camera</title>
+</head>
+
+<body>
+  <div>
+    <div>
+      <label for="rtspUri">RTSP URI:</label>
+      <!-- <input id="rtspUri" type="text" value="rtsp://192.168.5.71:8554/test" /> -->
+      <input id="rtspUri" type="text" value="rtsp://192.168.5.250:554/rtsp/live1" />
+    </div>
+    <div>
+      <label for="wsProxyUri">WS Proxy URI:</label>
+      <input id="wsProxyUri" type="text" value="ws://192.168.5.71:8854" />
+    </div>
+    <button id="play">Play</button>
+  </div>
+  <div style="position: fixed; width: 1280px; height: 720px">
+    <video style="position: absolute; width: 100%; height: 100%;" autoplay></video>
+  </div>
+  <script src="../media-stream-library.min.js"></script>
+  <script src="osl-player.js"></script>
+</body>
+
+</html>
