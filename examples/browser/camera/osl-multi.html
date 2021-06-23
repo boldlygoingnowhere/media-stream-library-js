@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Example video streaming from several cameras</title>
+</head>
+
+<body>
+  <div style="width: 40%; display:inline-block;" data-camId="0">
+    <div>
+      <div>
+        <label for="rtspUri0">RTSP URI:</label>
+        <input id="rtspUri0" type="text" value="rtsp://192.168.5.250:554/rtsp/live1" />
+      </div>
+      <div>
+        <label for="wsProxyUri0">WS Proxy URI:</label>
+        <input id="wsProxyUri0" type="text" value="ws://192.168.5.71:8854" />
+      </div>
+      <button>Play</button>
+    </div>
+    <div>
+      <video style="width: 100%" autoplay></video>
+    </div>
+  </div>
+  <div style="width: 40%; display:inline-block;" data-camId="1">
+    <div>
+      <div>
+        <label for="rtspUri1">RTSP URI:</label>
+        <input id="rtspUri1" type="text" value="rtsp://192.168.5.250:554/rtsp/live2" />
+      </div>
+      <div>
+        <label for="wsProxyUri1">WS Proxy URI:</label>
+        <input id="wsProxyUri1" type="text" value="ws://192.168.5.71:8854" />
+      </div>
+      <button>Play</button>
+    </div>
+    <div>
+      <video style="width: 100%" autoplay></video>
+    </div>
+  </div>
+  <div style="width: 40%; display:inline-block;" data-camId="2">
+    <div>
+      <div>
+        <label for="rtspUri2">RTSP URI:</label>
+        <input id="rtspUri2" type="text" value="rtsp://192.168.5.250:554/rtsp/live3" />
+      </div>
+      <div>
+        <label for="wsProxyUri2">WS Proxy URI:</label>
+        <input id="wsProxyUri2" type="text" value="ws://192.168.5.71:8854" />
+      </div>
+      <button>Play</button>
+    </div>
+    <div>
+      <video style="width: 100%" autoplay></video>
+    </div>
+  </div>
+  <div style="width: 40%; display:inline-block;" data-camId="3">
+    <div>
+      <div>
+        <label for="rtspUri3">RTSP URI:</label>
+        <input id="rtspUri3" type="text" value="rtsp://192.168.5.250:554/rtsp/live4" />
+      </div>
+      <div>
+        <label for="wsProxyUri3">WS Proxy URI:</label>
+        <input id="wsProxyUri3" type="text" value="ws://192.168.5.71:8854" />
+      </div>
+      <button>Play</button>
+    </div>
+    <div>
+      <video style="width: 100%" autoplay></video>
+    </div>
+  </div>
+
+  <script src="../media-stream-library.min.js"></script>
+  <script src="osl-player-multi.js"></script>
+</body>
+
+</html>
