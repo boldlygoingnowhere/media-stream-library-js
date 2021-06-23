@@ -430,3 +430,39 @@ export const messageFromBuffer = (buffer: Buffer): SdpMessage => {
     sdp: parse(buffer),
   }
 }
+
+export const sdpDeepCopy = (obj: any): any => {
+  // Handle the 3 simple types, and null or undefined
+  if (null == obj || "object" != typeof obj) return obj;
+
+  // Handle Date
+  if (obj instanceof Date) {
+    let copy = new Date();
+    copy.setTime(obj.getTime());
+    return copy;
+  }
+
+  // Handle Array
+  if (obj instanceof Array) {
+    let copy = [];
+    for (var i = 0, len = obj.length; i < len; i++) {
+      copy[i] = sdpDeepCopy(obj[i]);
+    }
+    return copy;
+  }
+
+  // Handle Object
+  if (obj instanceof Object) {
+    let copy: { [index: string]: any } = {};
+    for (var attr in obj) {
+      if (obj.hasOwnProperty(attr)) copy[attr] = sdpDeepCopy(obj[attr]);
+    }
+    return copy;
+  }
+
+  throw new Error("Unable to copy obj! Its type isn't supported.");
+}
+
+export const sdpMessageClone = (msg: SdpMessage): SdpMessage => {
+  return sdpDeepCopy(msg) as unknown as SdpMessage;
+}

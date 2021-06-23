@@ -35,23 +35,33 @@ export class H264Depay extends Tube {
           msg.type === MessageType.RTP &&
           payloadType(msg.data) === h264PayloadType
         ) {
-          const endOfFrame = marker(msg.data)
           const h264Message = h264DepayParser.parse(msg)
-
-          // Skip if not a full H264 frame, or when there hasn't been an I-frame yet
-          if (
-            h264Message === null ||
-            (!idrFound && h264Message.nalType !== NAL_TYPES.IDR_PICTURE)
-          ) {
+          // Skip if not a full H264 frame
+          // Also, don't forward non-IDR frames until an IDR frame has been received
+          if (h264Message === null ||
+            (!idrFound && h264Message.nalType === NAL_TYPES.NON_IDR_PICTURE)) {
             callback()
             return
           }
 
-          idrFound = true
+          if (h264Message.nalType === NAL_TYPES.IDR_PICTURE) {
+            idrFound = true
+          }
+
+          //if (h264Message.nalType === NAL_TYPES.SPS || h264Message.nalType === NAL_TYPES.PPS) {
+          //  console.log('Got ' + (h264Message.nalType === NAL_TYPES.SPS ? 'SPS' : 'PPS') + ': ' + h264Message.data.toString('hex'))
+          //}
 
           // H.264 over RTP uses the RTP marker bit to indicate a complete
           // frame.  At this point, the packets can be used to construct a
-          // complete message.
+          // complete message. This is not applicable to SPS and PPS frames.
+
+          let endOfFrame
+          if (h264Message.nalType === NAL_TYPES.SPS || h264Message.nalType === NAL_TYPES.PPS) {
+            endOfFrame = true
+          } else {
+            endOfFrame = marker(msg.data)
+          }
 
           packets.push(h264Message.data)
           if (endOfFrame) {

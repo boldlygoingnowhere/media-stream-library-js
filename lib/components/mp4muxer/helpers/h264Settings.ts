@@ -65,14 +65,9 @@ export const h264Settings = (
    */
 
   if (media.fmtp === undefined) {
-    //Add settings for ABIP
-    let fmtp = {
-      format: '',
-      parameters: { 'profile-level-id': '42c028', 'sprop-parameter-sets': 'Z0JAKJWgHgCJ+VA=,aM48gA==' }
-    }
-
-    media.fmtp = fmtp
+    throw new Error("SDP fmtp not present.");
   }
+
   const profileLevelId = media.fmtp.parameters['profile-level-id']
   const parameterSets = media.fmtp.parameters['sprop-parameter-sets']
     .split(',')

@@ -74,14 +74,18 @@ export class H264DepayParser {
         return null
       }
     } else if (
-      (type === NAL_TYPES.NON_IDR_PICTURE || type === NAL_TYPES.IDR_PICTURE) &&
+      (type === NAL_TYPES.NON_IDR_PICTURE || type === NAL_TYPES.IDR_PICTURE || type === NAL_TYPES.SPS || type === NAL_TYPES.PPS) &&
       this._buffer.length === 0
     ) {
-      /* Single NALU */ const h264frame = Buffer.concat([
+      /* Single NALU */
+
+      // Copy data whilst inserting a 4 byte header giving data length
+      const h264frame = Buffer.concat([
         Buffer.from([0, 0, 0, 0]),
         rtpPayload,
       ])
       h264frame.writeUInt32BE(h264frame.length - 4, 0)
+
       const msg: H264Message = {
         data: h264frame,
         type: MessageType.H264,
@@ -94,7 +98,7 @@ export class H264DepayParser {
       return msg
     } else {
       h264Debug(
-        `H264depayComponent can only extract types 1,5 and 28, got ${type}`,
+        `H264depayComponent can only extract types 1,5,7,8 and 28, got ${type}`,
       )
       this._buffer = Buffer.alloc(0)
       return null
