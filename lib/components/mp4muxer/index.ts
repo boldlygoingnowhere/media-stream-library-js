@@ -48,7 +48,9 @@ export class Mp4Muxer extends Tube {
               if (media.fmtp === undefined) {
                 return
               }
-              if (typeof media.fmtp.parameters['sprop-parameter-sets'] !== undefined) {
+              if (media.fmtp.parameters !== undefined &&
+                media.fmtp.parameters['profile-level-id'] !== undefined &&
+                media.fmtp.parameters['sprop-parameter-sets'] !== undefined) {
                 //console.log("sprops:" + media.fmtp.parameters['sprop-parameter-sets'])
                 sdpHasIncompleteH264Props = false
               }
@@ -88,10 +90,13 @@ export class Mp4Muxer extends Tube {
                     if (media.fmtp === undefined) {
                       media.fmtp = {
                         format: '',
-                        //Add a default profile-level-id
-                        //42h = baseline profile
-                        parameters: { 'profile-level-id': '42c028' }
+                        parameters: {}
                       }
+                    }
+                    if (media.fmtp.parameters['profile-level-id'] === undefined) {
+                      //Add a default profile-level-id
+                      //42h = baseline profile
+                      media.fmtp.parameters['profile-level-id'] = '42c028'
                     }
                     media.fmtp.parameters['sprop-parameter-sets'] = parameterSets
                     sdpHasIncompleteH264Props = false
