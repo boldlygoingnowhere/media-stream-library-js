@@ -26,12 +26,12 @@ for (var camItem in camItems) if (camItems.hasOwnProperty(camItem)) {
   const camId = camItems[camItem].getAttribute('data-camId')
   const videoEl = camItems[camItem].getElementsByTagName('video')[0]
   camItems[camItem].getElementsByTagName('button')[0].addEventListener('click', async (e) => {
-    pipeline[camItem] && pipeline[camItem].close()
+    pipeline[camId] && pipeline[camId].close()
 
     const rtspUri = document.querySelector('#rtspUri' + camId).value
     const wsProxyUri = document.querySelector('#wsProxyUri' + camId).value
 
     console.log(camId + ': RTSP=' + rtspUri + ',WS=' + wsProxyUri)
-    pipeline[camItem] = play(videoEl, rtspUri, wsProxyUri)
+    pipeline[camId] = play(videoEl, rtspUri, wsProxyUri)
   })
 }
