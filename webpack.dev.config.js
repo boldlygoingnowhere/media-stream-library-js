@@ -1,7 +1,7 @@
 const webpack = require('webpack')
 
 module.exports = {
-  target: 'web',
+  target: [ 'web', 'es5' ],
   entry: './lib/index.browser.ts',
   mode: 'development',
   devtool: 'inline-source-map',
@@ -9,7 +9,7 @@ module.exports = {
     library: 'mediaStreamLibrary',
     libraryTarget: 'umd',
     path: __dirname,
-    filename: 'dist/media-stream-library.min.js',
+    filename: 'dist/media-stream-library.legacy.dev.js',
   },
   resolve: {
     extensions: ['.ts', '.js'],
@@ -31,8 +31,13 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.ts$/,
-        exclude: /node_modules/,
+        // We need to transpile certain node_modules packages that are
+        // not ES5 compatible. Hence, include .js files in addition to .ts
+	// files.
+        test: /\.[tj]s$/,
+	// Exclude node modules except for the non ES5 compatible ones
+	// (currently debug and buffer).
+        exclude: /node_modules\/(?!(debug|buffer)\/).*/,
         use: {
           loader: 'babel-loader',
           options: {
@@ -43,8 +48,7 @@ module.exports = {
                 {
                   useBuiltIns: 'usage',
                   corejs: 3,
-                  // ignoreBrowserslistConfig: true,
-                  browserslistEnv: 'modern',
+                  browserslistEnv: 'legacy',
                 },
               ],
               '@babel/typescript',

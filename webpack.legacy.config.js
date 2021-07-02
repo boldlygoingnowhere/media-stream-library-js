@@ -1,7 +1,7 @@
 const webpack = require('webpack')
 
 module.exports = {
-  target: 'web',
+  target: [ 'web', 'es5' ],
   entry: './lib/index.browser.ts',
   mode: 'production',
   output: {
@@ -30,11 +30,13 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.ts$/,
-        // We need to transpile certain node_modules packages, as they
-        // don't supply any ES5 compatible code. This will become more
-        // of an issue as libraries move over to delivering ES6 only.
-        exclude: /node_modules\/(?!(debug)\/).*/,
+        // We need to transpile certain node_modules packages that are
+        // not ES5 compatible. Hence, include .js files in addition to .ts
+	// files.
+        test: /\.[tj]s$/,
+	// Exclude node modules except for the non ES5 compatible ones
+	// (currently debug and buffer).
+        exclude: /node_modules\/(?!(debug|buffer)\/).*/,
         use: {
           loader: 'babel-loader',
           options: {

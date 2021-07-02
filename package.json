@@ -25,7 +25,7 @@
     "build:cjs": "tsc -p tsconfig.cjs.json",
     "build:es5": "tsc -p tsconfig.es5.json",
     "build:bundle": "webpack && sbin/copyMinified.sh",
-    "build:bundle-dev": "webpack --config webpack.dev.config.js && sbin/copyMinified.sh",
+    "build:bundle-dev": "webpack --config webpack.dev.config.js",
     "build:bundle-legacy": "webpack --config webpack.legacy.config.js",
     "lint:ts": "eslint --ext '.ts' lib/",
     "prettier:check": "prettier --check '{lib,examples}/**/*.{ts,js}'",
