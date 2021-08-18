@@ -37,7 +37,7 @@ else
 	@echo ==============================================================
 	@echo "Installing $(LIBNAME) to $(DESTDIR)"
 	@echo ==============================================================
-	@install -D -T $(INSTALL_FILE_IN) $(DESTDIR)/$(INSTALL_FILE_OUT)
+	@install -D -T $(INSTALL_FILE_IN) $(DESTDIR)/lib/$(INSTALL_FILE_OUT)
 	@for file in $(EXTRA_INSTALL_FILES); do install -D $(DESTDIR) $$file; done
 endif
 
