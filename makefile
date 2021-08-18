@@ -45,6 +45,6 @@ clean:
 	@echo ==================================
 	@echo "Cleaning $(LIBNAME)"
 	@echo ==================================
-	@rm $(INSTALL_FILE_IN)
+	@rm -f $(INSTALL_FILE_IN)
 
 .PHONY: default usage prepare build install clean
