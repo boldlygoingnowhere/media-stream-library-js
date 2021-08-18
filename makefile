@@ -22,7 +22,7 @@ prepare:
 #It is not needed anyway but a side effect is that part of the yarn cache is deleted and yarn.lock is updated
 	sed -i '/cypress/d' package.json
 #Install dependencies from yarn cache
-	yarn install
+	yarn install > /dev/null
 
 build:
 	@echo ==================================
