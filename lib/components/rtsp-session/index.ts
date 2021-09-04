@@ -257,7 +257,12 @@ export class RtspSession extends Tube {
     if (attribute === undefined || attribute === '*') {
       return baseURL
     }
-    return new URL(attribute, baseURL).href
+
+    //The following original code will remove any component in the baseURL with a query string suffix
+    //return new URL(attribute, baseURL).href
+
+    //Hence, we use this instead:
+    return baseURL + (baseURL.endsWith("/") ? "" : "/") + attribute
   }
 
   /**
