@@ -31,6 +31,22 @@ export class Mp4Muxer extends Tube {
     let cachedPps = Buffer.from('')
     let havePps = false
     let sentMoov = false
+    let ntpSyncDone = false
+    let trackTimes: {
+      //Indexed by trackId - 1
+      rtpRunningTimestamp: number;
+      rtpClockrate: number;
+      ntpTimestamp: number;
+    }[] = [];
+    let ntpsync: {
+      pending: boolean;
+      trackId: number;
+      rtpRunningTimestampAdj: number;
+    } = {
+      pending: false,
+      trackId: 0,
+      rtpRunningTimestampAdj: 0
+    };
     const incoming = new Transform({
       objectMode: true,
       transform: function (msg: Message, encoding, callback) {
@@ -140,13 +156,68 @@ export class Mp4Muxer extends Tube {
                   (msg.ntpTimestamp - boxBuilder.ntpPresentationTime) / 1000
               }
 
+              //Check if audio/video sync needed once we have ntp Timestamps
+              if (!ntpSyncDone) {
+                if (!boxBuilder.audioTrackId || !boxBuilder.videoTrackId) {
+                  //No sync needed since we don't have both audio and video so mark as done
+                  ntpSyncDone = true
+                } else if (trackId !== boxBuilder.videoTrackId && trackId !== boxBuilder.audioTrackId) {
+                  //Not a track we are interested in - do nothing
+                } else if (ntpTimestamp) {
+                  //The moof box is constructed immediately with an estimated duration rather than 
+                  //waiting for the next frame to get a precise duration
+                  //This means that is has already determined the decode time rtpRunningTimestamp for the next moof box
+                  //and hence this is an estimated value
+
+                  //This cannot be easily corrected in the sync handler - it means that skipped frames will
+                  //cause the ntp sync handler to compensate
+
+                  //The moof box generator limits the adjustment that is applied to prevent big jumps from the ntp sync
+                  const rtpRunningTimestamp = boxBuilder.trackData[trackId - 1].baseMediaDecodeTime
+                  const rtpClockrate = boxBuilder.trackData[trackId - 1].clockrate
+
+                  //Store new attributes
+                  trackTimes[trackId - 1] = {
+                    rtpClockrate: rtpClockrate,
+                    rtpRunningTimestamp: rtpRunningTimestamp,
+                    ntpTimestamp: ntpTimestamp,
+                  }
+
+                  if (!ntpsync.pending) {
+                    const audioTrackIndex = boxBuilder.audioTrackId - 1
+                    const videoTrackIndex = boxBuilder.videoTrackId - 1
+                    if (trackTimes[audioTrackIndex] && trackTimes[videoTrackIndex] &&
+                      trackTimes[audioTrackIndex].ntpTimestamp && trackTimes[videoTrackIndex].ntpTimestamp) {
+                      //Calculate what video running time should be
+                      const videoNtpDeltaSecs = (trackTimes[videoTrackIndex].ntpTimestamp - trackTimes[audioTrackIndex].ntpTimestamp) / 1000
+                      const expectedVideoRunningTimestamp = ((trackTimes[audioTrackIndex].rtpRunningTimestamp / trackTimes[audioTrackIndex].rtpClockrate) +
+                        videoNtpDeltaSecs) * trackTimes[videoTrackIndex].rtpClockrate
+                      ntpsync.rtpRunningTimestampAdj = Math.round(expectedVideoRunningTimestamp - trackTimes[videoTrackIndex].rtpRunningTimestamp)
+
+                      //Set pending flag to prevent other sync calculations until change absorbed
+                      if (ntpsync.rtpRunningTimestampAdj) {
+                        ntpsync.trackId = videoTrackIndex + 1
+                        ntpsync.pending = true
+                      }
+                    }
+                  }
+                }
+              }
+
+              const rtpRunningTimestampAdj = (ntpsync.pending && trackId == ntpsync.trackId) ? ntpsync.rtpRunningTimestampAdj : 0
               const byteLength = msg.data.byteLength
-              const moof = boxBuilder.moof({ trackId, timestamp, byteLength })
+              const moof = boxBuilder.moof({ trackId, timestamp, byteLength }, rtpRunningTimestampAdj)
               const mdat = boxBuilder.mdat(msg.data)
 
               const data = Buffer.allocUnsafe(moof.byteLength + mdat.byteLength)
               moof.copy(data, 0)
               mdat.copy(data, moof.byteLength)
+
+              if (rtpRunningTimestampAdj) {
+                ntpsync.pending = false
+                //Only sync again when new trackTimes are obtained, so delete the current ones
+                delete trackTimes[trackId - 1]
+              }
 
               this.push({
                 type: MessageType.ISOM,

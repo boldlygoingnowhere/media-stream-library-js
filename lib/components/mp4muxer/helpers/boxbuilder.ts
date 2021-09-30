@@ -85,6 +85,7 @@ export class BoxBuilder {
   public ntpPresentationTime: number
   public trackData: TrackData[]
   public videoTrackId?: number
+  public audioTrackId?: number
 
   constructor() {
     this.trackIdMap = {}
@@ -172,6 +173,8 @@ export class BoxBuilder {
         // Mark the video track
         if (media.type.toLowerCase() === 'video') {
           this.videoTrackId = trackId
+        } else if (media.type.toLowerCase() === 'audio') {
+          this.audioTrackId = trackId
         }
 
         // Extract the settings from the SDP media information based on
@@ -208,7 +211,7 @@ export class BoxBuilder {
    * @param  metadata - Track ID, timestamp, bytelength
    * @return moof Container
    */
-  moof(metadata: MoofMetadata) {
+  moof(metadata: MoofMetadata, durationAdj?: number) {
     const { trackId, timestamp, byteLength } = metadata
     const trackOffset = trackId - 1
 
@@ -224,11 +227,25 @@ export class BoxBuilder {
 
     trackData.lastTimestamp = timestamp
 
+    let duration2 = duration
+
+    if (durationAdj) {
+      const minDuration = duration * 0.75
+      const maxDuration = duration * 1.5
+      duration2 = duration + durationAdj
+      if (duration2 < minDuration) {
+        duration2 = minDuration
+      } else if (duration2 > maxDuration) {
+        duration2 = maxDuration
+      }
+      duration2 = Math.round(duration2)
+    }
+
     const moof = new Container('moof')
     const traf = new Container('traf')
 
     const trun = new Box('trun', {
-      sample_duration: duration,
+      sample_duration: duration2,
       sample_size: byteLength,
       first_sample_flags: 0x40,
     })
@@ -242,7 +259,7 @@ export class BoxBuilder {
       ),
     )
 
-    trackData.baseMediaDecodeTime += duration
+    trackData.baseMediaDecodeTime += duration2
 
     // Correct the trun data offset
     trun.set('data_offset', moof.byteLength + 8)
