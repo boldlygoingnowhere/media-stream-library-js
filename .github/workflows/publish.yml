@@ -13,12 +13,12 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
 
       - name: Setup node
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v2
         with:
-          node-version: '14'
+          node-version: '16'
           registry-url: 'https://registry.npmjs.org'
 
       - name: Install dependencies
@@ -29,6 +29,9 @@ jobs:
       - name: Build
         run: yarn build
 
+      - name: Release changelog
+        run: ./sbin/changelog.py --skip-header single > release-CHANGELOG.md
+
       - name: Release
         id: release
         uses: actions/create-release@v1
@@ -37,6 +40,7 @@ jobs:
         with:
           tag_name: ${{ github.ref }}
           release_name: Release ${{ github.ref }}
+          body_path: release-CHANGELOG.md
           draft: false
           prerelease: false
 
@@ -48,16 +52,6 @@ jobs:
           upload_url: ${{ steps.release.outputs.upload_url }}
           asset_path: dist/media-stream-library.min.js
           asset_name: media-stream-library.min.js
-          asset_content_type: application/javascript
-
-      - name: Upload bundle (legacy)
-        uses: actions/upload-release-asset@v1.0.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.release.outputs.upload_url }}
-          asset_path: dist/media-stream-library.legacy.min.js
-          asset_name: media-stream-library.legacy.min.js
           asset_content_type: application/javascript
 
       - name: Upload changelog
