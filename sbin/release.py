@@ -44,10 +44,11 @@ with open("package.json", "r") as f:
     utils.cmd(["yarn", "version", "--deferred", next_version])
     utils.cmd(["yarn", "version", "apply", "--all"])
 
-    print(" - Update changelog")
-    changelog = utils.cmd(["./sbin/changelog.py", "full", "--release", next_tag])
-    with open("CHANGELOG.md", "w") as f:
-        f.write(changelog)
+    # just don't bother with this at all...
+    #print(" - Update changelog")
+    #changelog = utils.cmd(["./sbin/changelog.py", "full", "--release", next_tag])
+    #with open("CHANGELOG.md", "w") as f:
+    #    f.write(changelog)
 
     print(" - Create release commit and tag")
     utils.cmd(["git", "add", "-u"])
