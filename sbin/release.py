@@ -50,7 +50,7 @@ with open("package.json", "r") as f:
     #with open("CHANGELOG.md", "w") as f:
     #    f.write(changelog)
 
-    print(" - Create release commit and tag")
-    utils.cmd(["git", "add", "-u"])
-    utils.cmd(["git", "commit", "-m", next_tag])
-    utils.cmd(["git", "tag", "-a", "-m", next_tag, next_tag])
+    #print(" - Create release commit and tag")
+    #utils.cmd(["git", "add", "-u"])
+    #utils.cmd(["git", "commit", "-m", next_tag])
+    #utils.cmd(["git", "tag", "-a", "-m", next_tag, next_tag])
