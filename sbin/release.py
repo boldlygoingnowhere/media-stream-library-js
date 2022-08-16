@@ -39,12 +39,13 @@ with open("package.json", "r") as f:
     )
     next_tag = f"v{next_version}"
 
-    # Generate new commit
-    print(f" - Update version to {next_version}")
-    utils.cmd(["yarn", "version", "--deferred", next_version])
-    utils.cmd(["yarn", "version", "apply", "--all"])
-
     # just don't bother with this at all...
+
+    # Generate new commit
+    #print(f" - Update version to {next_version}")
+    #utils.cmd(["yarn", "version", "--deferred", next_version])
+    #utils.cmd(["yarn", "version", "apply", "--all"])
+
     #print(" - Update changelog")
     #changelog = utils.cmd(["./sbin/changelog.py", "full", "--release", next_tag])
     #with open("CHANGELOG.md", "w") as f:
