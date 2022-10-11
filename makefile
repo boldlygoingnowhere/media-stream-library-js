@@ -1,5 +1,14 @@
 LIBNAME = media-stream-library
+DEBUG?=no
+
+ifeq ($(DEBUG), yes)
+YARN_TARGET = build:bundle-dev
 INSTALL_FILE_IN = dist/media-stream-library.legacy.dev.js
+else
+YARN_TARGET = build:bundle-legacy
+INSTALL_FILE_IN = dist/media-stream-library.legacy.min.js
+endif
+
 INSTALL_FILE_OUT = media-stream-library.js
 EXTRA_INSTALL_FILES = 
 
@@ -28,7 +37,7 @@ build:
 	@echo ==================================
 	@echo "Building $(LIBNAME)"
 	@echo ==================================
-	yarn build:bundle-dev
+	yarn $(YARN_TARGET)
 
 install:
 ifndef DESTDIR 
@@ -45,6 +54,6 @@ clean:
 	@echo ==================================
 	@echo "Cleaning $(LIBNAME)"
 	@echo ==================================
-	@rm -f $(INSTALL_FILE_IN)
+	@rm -f dist/*
 
 .PHONY: default usage prepare build install clean
