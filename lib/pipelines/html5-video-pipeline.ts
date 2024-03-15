@@ -31,6 +31,7 @@ export class Html5VideoPipeline extends RtspMp4Pipeline {
   public onServerClose?: () => void
   public ready: Promise<void>
   public tracks?: MediaTrack[]
+  public auth?: Auth
 
   private _src?: WSSource
   private readonly _sink: MseSink
@@ -46,8 +47,8 @@ export class Html5VideoPipeline extends RtspMp4Pipeline {
     super(rtspConfig)
 
     if (authConfig) {
-      const auth = new Auth(authConfig)
-      this.insertBefore(this.rtsp, auth)
+      this.auth = new Auth(authConfig)
+      this.insertBefore(this.rtsp, this.auth)
     }
 
     const mseSink = new MseSink(mediaElement)
