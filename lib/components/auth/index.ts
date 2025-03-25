@@ -1,5 +1,6 @@
 import { merge } from '../../utils/config'
 import { statusCode } from '../../utils/protocols/rtsp'
+import { sequence } from '../../utils/protocols/rtsp'
 import { Tube } from '../component'
 import { Message, MessageType, RtspMessage } from '../message'
 import { createTransform } from '../messageStreams'
@@ -24,6 +25,9 @@ const DEFAULT_CONFIG = {
  */
 
 export class Auth extends Tube {
+
+  public onCredsError?: () => void
+
   constructor(config: AuthConfig = {}) {
     const { username, password } = merge(DEFAULT_CONFIG, config)
     if (username === undefined || password === undefined) {
@@ -32,6 +36,9 @@ export class Auth extends Tube {
 
     let lastSentMessage: RtspMessage
     let authHeader: string
+    let lastSequence: number | null
+    let sequenceAuthFailures: number
+    let reportCredsError: () => void
 
     const outgoing = createTransform(function (
       msg: Message,
@@ -57,6 +64,23 @@ export class Auth extends Tube {
         msg.type === MessageType.RTSP &&
         statusCode(msg.data) === UNAUTHORIZED
       ) {
+        const seq = sequence(msg.data)
+        if (typeof lastSequence !== "undefined" && lastSequence === seq) {
+          if (typeof sequenceAuthFailures !== "undefined") {
+            sequenceAuthFailures++;
+            if (sequenceAuthFailures >= 2) {
+              if (reportCredsError) {
+                reportCredsError();
+              }
+              return
+            }
+          } else {
+            sequenceAuthFailures = 1
+          }
+        } else {
+          lastSequence = seq
+          sequenceAuthFailures = 1
+        }
         const headers = msg.data.toString().split('\n')
         const wwwAuth = headers.find((header) => /WWW-Auth/i.test(header))
         if (wwwAuth === undefined) {
@@ -87,5 +111,12 @@ export class Auth extends Tube {
     })
 
     super(incoming, outgoing)
+
+    reportCredsError = function () {
+      if (this.onCredsError)
+        this.onCredsError();
+    }
+
+    reportCredsError = reportCredsError.bind(this);
   }
 }
