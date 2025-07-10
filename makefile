@@ -1,5 +1,6 @@
 LIBNAME = media-stream-library
 DEBUG?=no
+NODE_OPTIONS=--openssl-legacy-provider
 
 ifeq ($(DEBUG), yes)
 YARN_TARGET = build:bundle-dev
@@ -31,13 +32,13 @@ prepare:
 #It is not needed anyway but a side effect is that part of the yarn cache is deleted and yarn.lock is updated
 	sed -i '/cypress/d' package.json
 #Install dependencies from yarn cache
-	yarn install > /dev/null
+	export NODE_OPTIONS=${NODE_OPTIONS} && npm install > /dev/null
 
 build:
 	@echo ==================================
 	@echo "Building $(LIBNAME)"
 	@echo ==================================
-	yarn $(YARN_TARGET)
+	export NODE_OPTIONS=${NODE_OPTIONS} && npm run $(YARN_TARGET)
 
 install:
 ifndef DESTDIR 
