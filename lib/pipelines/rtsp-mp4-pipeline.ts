@@ -17,6 +17,7 @@ import { Mp4Muxer } from '../components/mp4muxer'
  */
 export class RtspMp4Pipeline extends RtspPipeline {
   public onSync?: (ntpPresentationTime: number) => void
+  public onPresentationTime?: (dataPresentationTime: number, basePresentationTime: number) => void
 
   private readonly _mp4Muxer: Mp4Muxer
 
@@ -29,6 +30,11 @@ export class RtspMp4Pipeline extends RtspPipeline {
 
     mp4Muxer.onSync = (ntpPresentationTime) => {
       this.onSync && this.onSync(ntpPresentationTime)
+    }
+
+    const self = this
+    mp4Muxer.onPresentationTime = (dataPresentationTime, basePresentationTime) => {
+      self.onPresentationTime && self.onPresentationTime(dataPresentationTime, basePresentationTime)
     }
 
     this.append(h264Depay, aacDepay, mp4Muxer)

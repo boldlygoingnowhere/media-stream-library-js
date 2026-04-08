@@ -14,6 +14,7 @@ import { messageFromBuffer, sdpMessageClone } from '../../utils/protocols/sdp'
 export class Mp4Muxer extends Tube {
   public boxBuilder: BoxBuilder
   public onSync?: (ntpPresentationTime: number) => void
+  public onPresentationTime?: (dataPresentationTime: number, basePresentationTime: number) => void
   /**
    * Create a new mp4muxer component.
    * @return {undefined}
@@ -23,6 +24,10 @@ export class Mp4Muxer extends Tube {
     const onSync = (ntpPresentationTime: number) => {
       this.onSync && this.onSync(ntpPresentationTime)
     }
+    let onPresentationTime = (dataPresentationTime: number, basePresentationTime: number) => {
+      this.onPresentationTime && this.onPresentationTime(dataPresentationTime, basePresentationTime)
+    }
+
     let sdpHasIncompleteH264Props = false
     let clonedSdpMessage = messageFromBuffer(Buffer.from(''))
     let haveSdpMessage = false
@@ -142,6 +147,8 @@ export class Mp4Muxer extends Tube {
                 }
               }
 
+              if (boxBuilder.ntpPresentationTime && msg.ntpTimestamp !== undefined)
+                onPresentationTime(msg.ntpTimestamp, boxBuilder.ntpPresentationTime)
               let checkpointTime: number | undefined
               const idrPicture =
                 msg.type === MessageType.H264
@@ -271,6 +278,7 @@ export class Mp4Muxer extends Tube {
 
     super(incoming)
     this.boxBuilder = boxBuilder
+    onPresentationTime = onPresentationTime.bind(this);
   }
 
   get bitrate() {
